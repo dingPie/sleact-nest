@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TokenType } from 'src/@common/types/token';
 
-export class SignInBodyDto {
+export class UserType {
+  @ApiProperty({
+    description: '사용자 아이디',
+    example: 1,
+  })
+  public id: number;
+
   @ApiProperty({
     description: '사용자 이메일',
     example: 'user@example.com',
@@ -13,12 +18,4 @@ export class SignInBodyDto {
     example: '닉네임',
   })
   public nickname: string;
-
-  @ApiProperty({
-    description: '사용자 비밀번호',
-    example: 'password123',
-  })
-  public password: string;
 }
-
-export class SignInResDto extends TokenType {}
