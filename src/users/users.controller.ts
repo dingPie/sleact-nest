@@ -4,6 +4,7 @@ import { SignInBodyDto, SignInResDto } from './dto/sign-in.dto';
 import { UsersService } from './users.service';
 import { GetUsersResDto } from './dto/get-users.dto';
 import { GetUserResDto } from './dto/get-user.dto';
+import { User } from 'src/@common/decorators/user.decorator';
 
 @Controller('api/users')
 export class UsersController {
@@ -14,7 +15,9 @@ export class UsersController {
     description: '사용자 목록을 조회합니다.',
   })
   @Get()
-  getUsers(): GetUsersResDto[] {
+  getUsers(@User() user): GetUsersResDto[] {
+    console.log(user);
+
     return this.usersService.getUsers();
   }
 
