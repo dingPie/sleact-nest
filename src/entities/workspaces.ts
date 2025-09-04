@@ -17,7 +17,7 @@ import { Users } from './users';
 
 @Index('name', ['name'], { unique: true })
 @Index('url', ['url'], { unique: true })
-@Index('owner_id', ['owner_id'], {})
+@Index('IDX_workspaces_owner_id', ['ownerId'], {})
 @Entity({ schema: 'sleact', name: 'workspaces' })
 export class Workspaces extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })

@@ -4,7 +4,7 @@ import { DateEntity } from '../@common/entities/date-entity';
 import { Users } from './users';
 import { Workspaces } from './workspaces';
 
-@Index('user_id', ['user_id'], {})
+@Index('IDX_workspace_members_user_id', ['userId'], {})
 @Entity('workspace_members', { schema: 'sleact' })
 export class WorkspaceMembers extends DateEntity {
   @Column('int', { primary: true, name: 'workspace_id' })
@@ -13,7 +13,7 @@ export class WorkspaceMembers extends DateEntity {
   @Column('int', { primary: true, name: 'user_id' })
   userId: number;
 
-  @Column('datetime', { name: 'logged_in_at', nullable: true })
+  @Column('timestamp', { name: 'logged_in_at', nullable: true })
   loggedInAt: Date | null;
 
   @ManyToOne(() => Workspaces, (workspaces) => workspaces.workspaceMembers, {

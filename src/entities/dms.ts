@@ -11,9 +11,9 @@ import { DateEntity } from '../@common/entities/date-entity';
 import { Users } from './users';
 import { Workspaces } from './workspaces';
 
-@Index('workspace_id', ['workspace_id'], {})
-@Index('dms_ibfk_2', ['sender_id'], {})
-@Index('dms_ibfk_3', ['receiver_id'], {})
+@Index('IDX_dms_workspace_id', ['workspaceId'], {})
+@Index('IDX_dms_sender_id', ['senderId'], {})
+@Index('IDX_dms_receiver_id', ['receiverId'], {})
 @Entity({ schema: 'sleact', name: 'dms' })
 export class DMs extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })

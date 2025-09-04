@@ -3,7 +3,7 @@ import { DateEntity } from '../@common/entities/date-entity';
 import { Channels } from './channels';
 import { Users } from './users';
 
-@Index('user_id', ['user_id'], {})
+@Index('IDX_channel_members_user_id', ['userId'], {})
 @Entity({ schema: 'sleact', name: 'channel_members' })
 export class ChannelMembers extends DateEntity {
   @Column('int', { primary: true, name: 'channel_id' })

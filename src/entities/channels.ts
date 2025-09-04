@@ -14,7 +14,7 @@ import { ChannelMembers } from './channel-members';
 import { Users } from './users';
 import { Workspaces } from './workspaces';
 
-@Index('workspace_id', ['workspace_id'], {})
+@Index('IDX_channels_workspace_id', ['workspaceId'], {})
 @Entity({ schema: 'sleact' })
 export class Channels extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
@@ -23,11 +23,10 @@ export class Channels extends DateEntity {
   @Column('varchar', { name: 'name', length: 30 })
   name: string;
 
-  @Column('tinyint', {
+  @Column('boolean', {
     name: 'private',
     nullable: true,
-    width: 1,
-    default: () => "'0'",
+    default: false,
   })
   private: boolean | null;
 

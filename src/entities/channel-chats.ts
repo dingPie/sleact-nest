@@ -10,8 +10,8 @@ import {
 import { Channels } from './channels';
 import { Users } from './users';
 
-@Index('user_id', ['user_id'], {})
-@Index('channel_id', ['channel_id'], {})
+@Index('IDX_channel_chats_user_id', ['userId'], {})
+@Index('IDX_channel_chats_channel_id', ['channelId'], {})
 @Entity({ schema: 'sleact', name: 'channel_chats' })
 export class ChannelChats extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })

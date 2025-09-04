@@ -11,15 +11,15 @@ import { DateEntity } from '../@common/entities/date-entity';
 import { Users } from './users';
 import { Workspaces } from './workspaces';
 
-@Index('workspace_id', ['workspaceId'], {})
-@Index('sender_id', ['senderId'], {})
-@Index('receiver_id', ['receiverId'], {})
+@Index('IDX_mentions_workspace_id', ['workspaceId'], {})
+@Index('IDX_mentions_sender_id', ['senderId'], {})
+@Index('IDX_mentions_receiver_id', ['receiverId'], {})
 @Entity({ schema: 'sleact', name: 'mentions' })
 export class Mentions extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('enum', { name: 'category', enum: ['chat', 'dm', 'system'] })
+  @Column('varchar', { name: 'category', length: 10 })
   category: 'chat' | 'dm' | 'system';
 
   @Column('int', { name: 'chat_id', nullable: true })
