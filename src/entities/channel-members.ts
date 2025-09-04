@@ -1,5 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { DateEntity } from 'src/@common/entities/date-entity';
+import { DateEntity } from '../@common/entities/date-entity';
 import { Channels } from './channels';
 import { Users } from './users';
 

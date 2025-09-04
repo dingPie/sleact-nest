@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { DateEntity } from 'src/@common/entities/date-entity';
+import { DateEntity } from '../@common/entities/date-entity';
 
 import { Users } from './users';
 import { Workspaces } from './workspaces';

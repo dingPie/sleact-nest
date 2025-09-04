@@ -8,7 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { DateEntity } from 'src/@common/entities/date-entity';
+import { DateEntity } from '../@common/entities/date-entity';
 import { Channels } from './channels';
 import { DMs } from './dms';
 import { Mentions } from './mentions';

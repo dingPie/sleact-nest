@@ -6,14 +6,14 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { DateEntity } from 'src/@common/entities/date-entity';
+import { DateEntity } from '../@common/entities/date-entity';
 
 import { Users } from './users';
 import { Workspaces } from './workspaces';
 
-@Index('workspace_id', ['workspace_id'], {})
-@Index('sender_id', ['sender_id'], {})
-@Index('receiver_id', ['receiver_id'], {})
+@Index('workspace_id', ['workspaceId'], {})
+@Index('sender_id', ['senderId'], {})
+@Index('receiver_id', ['receiverId'], {})
 @Entity({ schema: 'sleact', name: 'mentions' })
 export class Mentions extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })

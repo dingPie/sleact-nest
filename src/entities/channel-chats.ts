@@ -1,4 +1,4 @@
-import { DateEntity } from 'src/@common/entities/date-entity';
+import { DateEntity } from '../@common/entities/date-entity';
 import {
   Column,
   Entity,
