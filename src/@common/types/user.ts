@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Users } from 'src/entities/users';
 
-export class UserType {
+export class UserType implements Pick<Users, 'id' | 'email' | 'nickname'> {
   @ApiProperty({
     description: '사용자 아이디',
     example: 1,
