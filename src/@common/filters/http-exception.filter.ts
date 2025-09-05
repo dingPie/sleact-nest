@@ -16,6 +16,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const message = exception.message;
 
+    const error = exception.getResponse() as
+      | string
+      | { error: string; message: string[]; statusCode: number }; // 이게 class-validator 에러 타입
+
+    // 여긴 class-validator 에러 처리
+    if (typeof error !== 'string' && error.error === 'Bad Request') {
+      response.status(status).json({
+        statusCode: status,
+        path: request.url,
+        message: error.message,
+      });
+    }
+
     response.status(status).json({
       statusCode: status,
       path: request.url,

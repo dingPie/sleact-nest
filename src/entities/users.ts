@@ -16,6 +16,7 @@ import { Mentions } from './mentions';
 import { WorkspaceMembers } from './workspace-members';
 import { Workspaces } from './workspaces';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 @Index('email', ['email'], { unique: true })
 @Entity({ schema: 'sleact', name: 'users' })
@@ -23,6 +24,8 @@ export class Users extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @IsEmail()
+  @IsNotEmpty()
   @ApiProperty({
     description: '사용자 이메일',
     example: 'user@example.com',
@@ -30,6 +33,8 @@ export class Users extends DateEntity {
   @Column('varchar', { name: 'email', unique: true, length: 30 })
   email: string;
 
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     description: '사용자 닉네임',
     example: '닉네임',
@@ -37,6 +42,8 @@ export class Users extends DateEntity {
   @Column('varchar', { name: 'nickname', length: 30 })
   nickname: string;
 
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({
     description: '사용자 비밀번호',
     example: 'password123',
