@@ -14,6 +14,7 @@ import { GetUsersResDto } from './dto/get-users.dto';
 import { GetUserResDto } from './dto/get-user.dto';
 import { User } from 'src/@common/decorators/user.decorator';
 import { UndefinedToNullInterceptor } from 'src/@common/interceptors/undefined-to-null.interceptor';
+import { SignUpBodyDto, SignUpResDto } from './dto/sign-up.dto';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller('api/users')
@@ -52,11 +53,21 @@ export class UsersController {
   }
 
   @ApiOperation({
+    summary: '회원가입',
+    description: '회원가입 성공 시 토큰을 발급합니다.',
+  })
+  @Post('sign-up')
+  async signUp(@Body() body: SignUpBodyDto): Promise<SignUpResDto> {
+    const res = await this.usersService.signUp(body);
+    return res;
+  }
+
+  @ApiOperation({
     summary: '로그아웃',
     description: '로큰을 만료시킵니다 (안쓰일수도).',
   })
-  @Post('logout')
-  logout(@Req() req, @Res() res) {
+  @Post('sign-out')
+  signOut(@Req() req, @Res() res) {
     console.log(req, res);
   }
 }
