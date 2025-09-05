@@ -2,10 +2,10 @@ import { PickType } from '@nestjs/swagger';
 import { TokenType } from 'src/@common/types/token';
 import { Users } from 'src/entities/users';
 
-export class SignInBodyDto extends PickType(Users, [
+export class SignUpBodyDto extends PickType(Users, [
   'email',
   'nickname',
   'password',
 ]) {}
 
-export class SignInResDto extends TokenType {}
+export class SignUpResDto extends TokenType {}

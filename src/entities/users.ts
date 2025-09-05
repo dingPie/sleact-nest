@@ -15,6 +15,7 @@ import { DMs } from './dms';
 import { Mentions } from './mentions';
 import { WorkspaceMembers } from './workspace-members';
 import { Workspaces } from './workspaces';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Index('email', ['email'], { unique: true })
 @Entity({ schema: 'sleact', name: 'users' })
@@ -22,12 +23,24 @@ export class Users extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @ApiProperty({
+    description: '사용자 이메일',
+    example: 'user@example.com',
+  })
   @Column('varchar', { name: 'email', unique: true, length: 30 })
   email: string;
 
+  @ApiProperty({
+    description: '사용자 닉네임',
+    example: '닉네임',
+  })
   @Column('varchar', { name: 'nickname', length: 30 })
   nickname: string;
 
+  @ApiProperty({
+    description: '사용자 비밀번호',
+    example: 'password123',
+  })
   @Column('varchar', { name: 'password', length: 100, select: false })
   password: string;
 
