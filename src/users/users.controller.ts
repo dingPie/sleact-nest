@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -15,6 +16,7 @@ import { GetUserResDto } from './dto/get-user.dto';
 import { User } from 'src/@common/decorators/user.decorator';
 import { UndefinedToNullInterceptor } from 'src/@common/interceptors/undefined-to-null.interceptor';
 import { SignUpBodyDto, SignUpResDto } from './dto/sign-up.dto';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller('api/users')
@@ -48,6 +50,7 @@ export class UsersController {
     description: '로그인 성공 시 토큰을 발급합니다.',
   })
   @Post('sign-in')
+  @UseGuards(LocalAuthGuard)
   signIn(@Body() body: SignInBodyDto): SignInResDto {
     return this.usersService.signIn(body);
   }
