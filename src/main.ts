@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './@common/filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import passport from 'passport';
+import session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +14,25 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  // P_TODO: 나중에 jwt로 변경할 수도 있음.
+  // express-session 설정 (passport.session() 보다 먼저 설정해야 함)
+  app.use(
+    session({
+      secret: configService.get<string>('COOKIE_SECRET', 'sleact-secret-key'), // 환경변수에서 시크릿 키 가져오기
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false, // HTTPS에서는 true로 설정
+        maxAge: 1000 * 60 * 60 * 24, // 24시간
+      },
+    }),
+  );
+
+  // passport 세션 사용
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   const config = new DocumentBuilder()
     .setTitle('Sleact API')
@@ -25,4 +46,4 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Server is running on port ${port}`);
 }
-bootstrap();
+void bootstrap();
