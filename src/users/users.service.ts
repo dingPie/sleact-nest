@@ -1,18 +1,27 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { SignInBodyDto, SignInResDto } from './dto/sign-in.dto';
-import { GetUserResDto } from './dto/get-user.dto';
-import { GetUsersResDto } from './dto/get-users.dto';
-import { SignUpBodyDto, SignUpResDto } from './dto/sign-up.dto';
-import { Repository } from 'typeorm';
-import { Users } from 'src/entities/users';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { ChannelMembers } from 'src/entities/channel-members';
+import { Users } from 'src/entities/users';
+import { WorkspaceMembers } from 'src/entities/workspace-members';
+import { DataSource, Repository } from 'typeorm';
+import { GetUserResDto } from './dto/get-user.dto';
+import { GetUsersResDto } from './dto/get-users.dto';
+import { SignInBodyDto, SignInResDto } from './dto/sign-in.dto';
+import { SignUpBodyDto, SignUpResDto } from './dto/sign-up.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+    // 이건 안써도 되나?
+    @InjectRepository(WorkspaceMembers)
+    private readonly workspaceMembersRepository: Repository<WorkspaceMembers>,
+    @InjectRepository(ChannelMembers)
+    private readonly channelMembersRepository: Repository<ChannelMembers>,
+
+    private dataSource: DataSource,
   ) {}
 
   getUsers(): GetUsersResDto[] {
@@ -42,9 +51,11 @@ export class UsersService {
 
   async signUp(body: SignUpBodyDto): Promise<SignUpResDto> {
     const { email, password, nickname } = body;
-    // if (!email || !password || !nickname) {
-    //   throw new HttpException('요청 값이 올바르지 않습니다.', 400);
-    // }
+
+    // transaction 시작
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     const user = await this.usersRepository.findOne({
       where: {
@@ -57,13 +68,36 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    console.log(hashedPassword);
 
-    await this.usersRepository.save({
-      email: email,
-      password: hashedPassword,
-      nickname: nickname,
-    });
+    try {
+      const createdUser = await queryRunner.manager.getRepository(Users).save({
+        email: email,
+        password: hashedPassword,
+        nickname: nickname,
+      });
+
+      // const createdUser = await this.usersRepository.save({
+      //   email: email,
+      //   password: hashedPassword,
+      //   nickname: nickname,
+      // });
+
+      await queryRunner.manager.getRepository(WorkspaceMembers).save({
+        userId: createdUser.id,
+        workspaceId: 1,
+      });
+      await queryRunner.manager.getRepository(ChannelMembers).save({
+        userId: createdUser.id,
+        channelId: 1,
+      });
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
 
     // P_TODO: 회원가입 성공 시 토큰 발급 로직 추가해야 함.
     return {

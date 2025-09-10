@@ -45,7 +45,7 @@ export class UsersController {
   getMe(@Req() req): GetUserResDto {
     console.log(req);
 
-    return this.usersService.getMe(req);
+    return this.usersService.getMe();
   }
 
   @ApiOperation({
