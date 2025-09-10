@@ -18,6 +18,7 @@ import { WorkspacesController } from './workspaces/workspaces.controller';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       logging: true,
       autoLoadEntities: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController, ChannelsController, WorkspacesController],
   providers: [AppService, ConfigService, ChannelsService, WorkspacesService],

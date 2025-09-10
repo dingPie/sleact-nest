@@ -17,6 +17,8 @@ import { User } from 'src/@common/decorators/user.decorator';
 import { UndefinedToNullInterceptor } from 'src/@common/interceptors/undefined-to-null.interceptor';
 import { SignUpBodyDto, SignUpResDto } from './dto/sign-up.dto';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
+import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @Controller('api/users')
@@ -38,11 +40,12 @@ export class UsersController {
     summary: '내 정보 조회',
     description: '토큰을 기반으로 내 정보를 조회합니다.',
   })
+  @UseGuards(LoggedInGuard)
   @Get('me')
   getMe(@Req() req): GetUserResDto {
     console.log(req);
 
-    return this.usersService.getMe();
+    return this.usersService.getMe(req);
   }
 
   @ApiOperation({
@@ -59,6 +62,7 @@ export class UsersController {
     summary: '회원가입',
     description: '회원가입 성공 시 토큰을 발급합니다.',
   })
+  @UseGuards(NotLoggedInGuard)
   @Post('sign-up')
   async signUp(@Body() body: SignUpBodyDto): Promise<SignUpResDto> {
     const res = await this.usersService.signUp(body);
@@ -69,6 +73,7 @@ export class UsersController {
     summary: '로그아웃',
     description: '로큰을 만료시킵니다 (안쓰일수도).',
   })
+  @UseGuards(LoggedInGuard)
   @Post('sign-out')
   signOut(@Req() req, @Res() res) {
     console.log(req, res);
