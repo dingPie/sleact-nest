@@ -37,10 +37,63 @@ export class WorkspacesService {
   }
 
   async createWorkspace(myId: number, body: CreateWorkspaceBodyDto) {
-    return this.workspacesRepository.save({
-      name: body.name,
-      url: body.url,
-      ownerId: myId,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const createdWorkspace = await queryRunner.manager
+        .getRepository(Workspaces)
+        .save({
+          name: body.name,
+          url: body.url,
+          ownerId: myId,
+        });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [_, createdChannel] = await Promise.all([
+        queryRunner.manager.getRepository(WorkspaceMembers).save({
+          userId: myId,
+          workspaceId: createdWorkspace.id,
+        }),
+
+        queryRunner.manager.getRepository(Channels).save({
+          name: '일반',
+          workspaceId: createdWorkspace.id,
+          userId: myId,
+        }),
+      ]);
+      await queryRunner.manager.getRepository(ChannelMembers).save({
+        userId: myId,
+        channelId: createdChannel.id,
+      });
+
+      await queryRunner.commitTransaction();
+      return createdWorkspace;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
+
+  async getWorkspaceMembers(url: string) {
+    const members = await this.usersRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.workspaceMembers', 'workspaceMember')
+      .innerJoin(
+        'workspaceMember.workspace',
+        'workspace',
+        'workspace.url = :url',
+        { url },
+      )
+      .getMany();
+
+    return members;
+  }
+
+  // async getWorkspaceChannels(workspaceId: number) {
+  //   return this.channelsRepository.find({ where: { workspaceId } });
+  // }
 }
