@@ -6,10 +6,17 @@ import { Workspaces } from 'src/entities/workspaces';
 import { WorkspaceMembers } from 'src/entities/workspace-members';
 import { Users } from 'src/entities/users';
 import { Channels } from 'src/entities/channels';
+import { ChannelMembers } from 'src/entities/channel-members';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Workspaces, WorkspaceMembers, Users, Channels]),
+    TypeOrmModule.forFeature([
+      Workspaces,
+      WorkspaceMembers,
+      ChannelMembers,
+      Users,
+      Channels,
+    ]),
   ],
   providers: [WorkspacesService],
   controllers: [WorkspacesController],

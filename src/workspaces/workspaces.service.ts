@@ -78,9 +78,10 @@ export class WorkspacesService {
     }
   }
 
-  async getWorkspaceMembers(url: string) {
+  async getWorkspaceMembers(url: string, id: number) {
     const members = await this.usersRepository
       .createQueryBuilder('user')
+      .where('user.id = :id', { id })
       .innerJoin('user.workspaceMembers', 'workspaceMember')
       .innerJoin(
         'workspaceMember.workspace',
