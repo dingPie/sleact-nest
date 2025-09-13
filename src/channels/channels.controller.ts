@@ -1,15 +1,37 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { GetChannelsParamDto, GetChannelsResDto } from './dto/get-channels.dto';
+import { ChannelsService } from './channels.service';
+import {
+  GetChannelByIdParamDto,
+  GetChannelByIdResDto,
+} from './dto/get-channel-by-id.dto';
+import {
+  CreateChannelBodyDto,
+  CreateChannelParamDto,
+  CreateChannelResDto,
+} from './dto/create-channel.dto';
+import {
+  GetChannelMembersParamDto,
+  GetChannelMembersResDto,
+} from './dto/get-channel-members.dto';
 
 @Controller('api/workspace/:url/channels')
 export class ChannelsController {
+  constructor(private channelsService: ChannelsService) {}
+
   /**
    * 채널 목록 조회
    * @param params
    * @returns
    */
   @Get()
-  getChannels(@Param() params: { url: string }) {
-    console.log(params);
+  async getChannels(
+    @Param() params: GetChannelsParamDto,
+  ): Promise<GetChannelsResDto[]> {
+    const result =
+      await this.channelsService.getWorkspaceChannelsByUserId(params);
+
+    return result;
   }
 
   /**
@@ -18,8 +40,12 @@ export class ChannelsController {
    * @returns
    */
   @Get(':id')
-  getChannelById(@Param() params: { url: string; id: string }) {
-    console.log(params);
+  async getChannelById(
+    @Param() params: GetChannelByIdParamDto,
+  ): Promise<GetChannelByIdResDto | null> {
+    const result =
+      await this.channelsService.getWorkspaceChannelsByChannelId(params);
+    return result;
   }
 
   /**
@@ -29,11 +55,16 @@ export class ChannelsController {
    * @returns
    */
   @Post()
-  createChannel(
-    @Param('url') params: { url: string },
-    @Body() body: { name: string }, // P_TODO:여기 DTO 만들기
-  ) {
-    console.log(params, body);
+  async createChannel(
+    @Param() params: CreateChannelParamDto,
+    @Body() body: CreateChannelBodyDto, // P_TODO:여기 DTO 만들기
+  ): Promise<CreateChannelResDto> {
+    const result = await this.channelsService.createWorkspaceChannels({
+      ...params,
+      ...body,
+    });
+
+    return result;
   }
 
   /**
@@ -57,8 +88,12 @@ export class ChannelsController {
    * @returns
    */
   @Get('members')
-  getChannelMembers(@Param() params: { url: string }) {
-    console.log(params);
+  async getChannelMembers(
+    @Param() params: GetChannelMembersParamDto,
+  ): Promise<GetChannelMembersResDto[]> {
+    const result =
+      await this.channelsService.getWorkspaceChannelMembers(params);
+    return result;
   }
 
   /**

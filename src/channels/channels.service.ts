@@ -6,6 +6,8 @@ import { Channels } from 'src/entities/channels';
 import { Users } from 'src/entities/users';
 import { Workspaces } from 'src/entities/workspaces';
 import { DataSource, MoreThan, Not, Repository } from 'typeorm';
+import { GetChannelsParamDto } from './dto/get-channels.dto';
+import { GetChannelByIdParamDto } from './dto/get-channel-by-id.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -33,7 +35,7 @@ export class ChannelsService {
    * @param userId 사용자 id
    * @returns 워크스페이스 채널 목록에 유저와 워크스페이스 정보 포함하여 반환
    */
-  async getWorkspaceChannelsByUserId(url: string, userId: number) {
+  async getWorkspaceChannelsByUserId({ url, userId }: GetChannelsParamDto) {
     const channels = await this.channelsRepository
       .createQueryBuilder('channel')
       .innerJoinAndSelect(
@@ -57,7 +59,10 @@ export class ChannelsService {
     return channels;
   }
 
-  async getWorkspaceChannelsByChannelId(url: string, channelId: number) {
+  async getWorkspaceChannelsByChannelId({
+    url,
+    channelId,
+  }: GetChannelByIdParamDto) {
     const channels = await this.channelsRepository.findOne({
       where: { id: channelId, workspace: { url } },
       relations: ['workspace', 'members'],
@@ -178,7 +183,7 @@ export class ChannelsService {
     return chats;
   }
 
-  async getChannelUnreadsCount({
+  async getChannelUnreadCount({
     url,
     name,
     after,
@@ -205,5 +210,30 @@ export class ChannelsService {
     });
 
     return unreadCount;
+  }
+
+  async postChat({
+    url,
+    name,
+    content,
+    userId,
+  }: {
+    url: string;
+    name: string;
+    content: string;
+    userId: number;
+  }) {
+    const channel = await this.channelsRepository.findOne({
+      where: { name, workspace: { url } },
+    });
+    if (!channel) {
+      throw new NotFoundException('채널을 찾을 수 없습니다.');
+    }
+
+    await this.channelChatsRepository.save({
+      channelId: channel.id,
+      userId,
+      content,
+    });
   }
 }
