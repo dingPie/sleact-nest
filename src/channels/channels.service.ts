@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ChannelChats } from 'src/entities/channel-chats';
 import { ChannelMembers } from 'src/entities/channel-members';
 import { Channels } from 'src/entities/channels';
 import { Users } from 'src/entities/users';
 import { Workspaces } from 'src/entities/workspaces';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, MoreThan, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelsService {
@@ -17,6 +18,8 @@ export class ChannelsService {
     private channelMembersRepository: Repository<ChannelMembers>,
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
+    @InjectRepository(ChannelChats)
+    private channelChatsRepository: Repository<ChannelChats>,
     private dataSource: DataSource,
   ) {}
 
@@ -61,5 +64,146 @@ export class ChannelsService {
     });
 
     return channels;
+  }
+
+  async createWorkspaceChannels({
+    url,
+    userId,
+    name,
+  }: {
+    url: string;
+    userId: number;
+    name: string;
+  }) {
+    const workspace = await this.workspacesRepository.findOne({
+      where: { url },
+    });
+    if (!workspace) {
+      throw new NotFoundException('워크스페이스를 찾을 수 없습니다.');
+    }
+
+    const createdChannel = await this.channelsRepository.save({
+      name,
+      workspaceId: workspace.id,
+    });
+    await this.channelMembersRepository.save({
+      channelId: createdChannel.id,
+      userId,
+    });
+
+    return createdChannel;
+  }
+
+  async getWorkspaceChannelMembers({
+    url,
+    name,
+  }: {
+    url: string;
+    name: string;
+  }) {
+    const members = await this.usersRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.channels', 'channels', 'channels.name = :name', {
+        name,
+      })
+      .innerJoin('channels.workspace', 'workspace', 'workspace.url = :url', {
+        url,
+      })
+      .getMany();
+
+    //  완전히 위와 같음
+    // const members2 = await this.usersRepository.find({
+    //   where: {
+    //     channels: {
+    //       name,
+    //     },
+    //     workspaces: {
+    //       url,
+    //     },
+    //   },
+    // });
+
+    return members;
+  }
+
+  async createWorkspaceChannelMembers({
+    url,
+    name,
+    email,
+  }: {
+    url: string;
+    name: string;
+    email: string;
+  }) {
+    const channel = await this.channelsRepository.findOne({
+      where: { name, workspace: { url } },
+    });
+    const user = await this.usersRepository.findOne({
+      where: { email },
+    });
+
+    if (!channel) {
+      throw new NotFoundException('채널을 찾을 수 없습니다.');
+    }
+
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다.');
+    }
+
+    await this.channelMembersRepository.save({
+      channelId: channel.id,
+      userId: user.id,
+    });
+  }
+
+  async getWorkspaceChannelChats({
+    url,
+    name,
+    perPage,
+    page,
+  }: {
+    url: string;
+    name: string;
+    perPage: number;
+    page: number;
+  }) {
+    const chats = await this.channelChatsRepository.find({
+      where: { channel: { name, workspace: { url } } },
+      take: perPage,
+      skip: (page - 1) * perPage,
+      order: { createdAt: 'DESC' },
+      relations: ['user'],
+    });
+
+    return chats;
+  }
+
+  async getChannelUnreadsCount({
+    url,
+    name,
+    after,
+    userId,
+  }: {
+    url: string;
+    name: string;
+    after: Date;
+    userId: number;
+  }) {
+    const channel = await this.channelsRepository.findOne({
+      where: { name, workspace: { url } },
+    });
+    if (!channel) {
+      throw new NotFoundException('채널을 찾을 수 없습니다.');
+    }
+
+    const unreadCount = await this.channelChatsRepository.count({
+      where: {
+        channel: { id: channel.id },
+        createdAt: MoreThan(after),
+        user: { id: Not(userId) },
+      },
+    });
+
+    return unreadCount;
   }
 }
