@@ -14,6 +14,7 @@ import { DMs } from './dms';
 import { Mentions } from './mentions';
 import { WorkspaceMembers } from './workspace-members';
 import { Users } from './users';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Index('name', ['name'], { unique: true })
 @Index('url', ['url'], { unique: true })
@@ -23,12 +24,24 @@ export class Workspaces extends DateEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @ApiProperty({
+    description: '워크스페이스 이름',
+    example: 'Sleact',
+  })
   @Column('varchar', { name: 'name', unique: true, length: 30 })
   name: string;
 
+  @ApiProperty({
+    description: '워크스페이스 url',
+    example: 'https://sleact.com',
+  })
   @Column('varchar', { name: 'url', unique: true, length: 30 })
   url: string;
 
+  @ApiProperty({
+    description: '워크스페이스 소유자 id',
+    example: 1,
+  })
   @Column('int', { name: 'owner_id', nullable: true })
   ownerId: number | null;
 

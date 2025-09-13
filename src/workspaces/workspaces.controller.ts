@@ -1,13 +1,31 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseArrayPipe,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import { User } from 'src/@common/decorators/user.decorator';
+import { UserType } from 'src/@common/types/user';
+import {
+  CreateWorkspaceBodyDto,
+  CreateWorkspaceResDto,
+} from './dto/create.dto';
+import { WorkspacesService } from './workspaces.service';
 
 @Controller('api/workspaces')
 export class WorkspacesController {
+  constructor(private readonly workspacesService: WorkspacesService) {}
   /**
    * 내 워크스페이스 목록 조회
    * @returns
    */
   @Get()
-  getMyWorkspaces() {
+  getMyWorkspaces(@User() user: UserType) {
+    console.log(user);
     console.log('getMyWorkspaces');
   }
 
@@ -16,8 +34,12 @@ export class WorkspacesController {
    * @returns
    */
   @Post()
-  createWorkspace() {
-    console.log('createWorkspace');
+  async createWorkspace(
+    @User() user: UserType,
+    @Body() body: CreateWorkspaceBodyDto,
+  ): Promise<CreateWorkspaceResDto> {
+    const res = await this.workspacesService.createWorkspace(user.id, body);
+    return res;
   }
 
   /**
@@ -36,7 +58,20 @@ export class WorkspacesController {
    * @returns
    */
   @Get(':url/members/:id')
-  getWorkspaceMemberById(@Param() params: { url: string; id: string }) {
+  getWorkspaceMemberById(
+    @Param(ParseIntPipe) params: { url: string; id: string },
+  ) {
+    console.log(params);
+  }
+
+  @Get(':url/members/:id')
+  getWorkspaceMemberById1(
+    @Param(new ParseArrayPipe({ items: String, separator: ',' }))
+    params: {
+      url: string;
+      id: string;
+    },
+  ) {
     console.log(params);
   }
 
