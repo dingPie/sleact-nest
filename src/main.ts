@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestApplication, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -6,9 +6,10 @@ import { HttpExceptionFilter } from './@common/filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import passport from 'passport';
 import session from 'express-session';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestApplication>(AppModule);
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
 
@@ -18,6 +19,16 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.enableCors({
+    origin:
+      process.env.NODE_ENV === 'production' ? [process.env.CLIENT_URL] : true,
+    credentials: true,
+  });
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
+  });
 
   // P_TODO: 나중에 jwt로 변경할 수도 있음.
   // express-session 설정 (passport.session() 보다 먼저 설정해야 함)

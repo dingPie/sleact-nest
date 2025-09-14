@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { GetChannelsParamDto, GetChannelsResDto } from './dto/get-channels.dto';
 import { ChannelsService } from './channels.service';
 import {
@@ -14,6 +22,10 @@ import {
   GetChannelMembersParamDto,
   GetChannelMembersResDto,
 } from './dto/get-channel-members.dto';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import path from 'path';
+import { UploadChannelFileParamDto } from './dto/upload-channel-file.dto';
 
 @Controller('api/workspace/:url/channels')
 export class ChannelsController {
@@ -74,12 +86,22 @@ export class ChannelsController {
    * @returns
    */
   @Post('images')
-  uploadChannelImage(
-    @Param() params: { url: string },
-    // P_TODO: 이미지 보내는거 확인
-    // @Body() body: { image: string }, // P_TODO:여기 DTO 만들기
-  ) {
-    console.log(params);
+  @UseInterceptors(
+    FilesInterceptor('image', 10, {
+      storage: diskStorage({
+        destination(req, file, cb) {
+          cb(null, 'uploads/');
+        },
+        filename(req, file, cb) {
+          const ext = path.extname(file.originalname);
+          cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    }),
+  )
+  uploadChannelFiles(@Param() params: UploadChannelFileParamDto) {
+    this.channelsService.uploadChannelFiles(params);
   }
 
   /**

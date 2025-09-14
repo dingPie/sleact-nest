@@ -13,16 +13,16 @@ import { EventsGateway } from 'src/events/events.gateway';
 @Injectable()
 export class ChannelsService {
   constructor(
-    @InjectRepository(Workspaces)
-    private workspacesRepository: Repository<Workspaces>,
     @InjectRepository(Channels)
     private channelsRepository: Repository<Channels>,
+    @InjectRepository(ChannelChats)
+    private channelChatsRepository: Repository<ChannelChats>,
     @InjectRepository(ChannelMembers)
     private channelMembersRepository: Repository<ChannelMembers>,
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
-    @InjectRepository(ChannelChats)
-    private channelChatsRepository: Repository<ChannelChats>,
+    @InjectRepository(Workspaces)
+    private workspacesRepository: Repository<Workspaces>,
     private dataSource: DataSource,
 
     private eventsGateway: EventsGateway,
@@ -243,5 +243,36 @@ export class ChannelsService {
     this.eventsGateway.server
       ?.to(`/ws-${url}-${createdChat.channelId}`)
       ?.emit('message', createdChat);
+  }
+
+  async uploadChannelFiles({
+    url,
+    name,
+    files,
+    userId,
+  }: {
+    url: string;
+    name: string;
+    userId: number;
+    files: Express.Multer.File[];
+  }) {
+    const channel = await this.channelsRepository.findOne({
+      where: { name, workspace: { url } },
+    });
+    if (!channel) {
+      throw new NotFoundException('채널을 찾을 수 없습니다.');
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const createdChat = await this.channelChatsRepository.save({
+        channel: { id: channel.id }, // 관계 객체 직접 할당
+        user: { id: userId }, // 관계 객체 직접 할당
+        content: files[i].path,
+      });
+
+      this.eventsGateway.server
+        ?.to(`/ws-${url}-${createdChat.channelId}`)
+        ?.emit('message', createdChat);
+    }
   }
 }
