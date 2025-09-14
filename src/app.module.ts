@@ -4,17 +4,13 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ChannelsModule } from './channels/channels.module';
+import { DmsModule } from './dms/dms.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { UsersModule } from './users/users.module';
-import { DmsModule } from './dms/dms.module';
-import { ChannelsService } from './channels/channels.service';
-import { ChannelsController } from './channels/channels.controller';
-import { ChannelsModule } from './channels/channels.module';
-import { WorkspacesService } from './workspaces/workspaces.service';
-import { WorkspacesController } from './workspaces/workspaces.controller';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -44,8 +40,8 @@ import { EventsModule } from './events/events.module';
     AuthModule,
     EventsModule,
   ],
-  controllers: [AppController, ChannelsController, WorkspacesController],
-  providers: [AppService, ConfigService, ChannelsService, WorkspacesService],
+  controllers: [AppController],
+  providers: [AppService, ConfigService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
