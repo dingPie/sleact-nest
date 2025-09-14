@@ -8,6 +8,7 @@ import { Workspaces } from 'src/entities/workspaces';
 import { DataSource, MoreThan, Not, Repository } from 'typeorm';
 import { GetChannelsParamDto } from './dto/get-channels.dto';
 import { GetChannelByIdParamDto } from './dto/get-channel-by-id.dto';
+import { EventsGateway } from 'src/events/events.gateway';
 
 @Injectable()
 export class ChannelsService {
@@ -23,6 +24,8 @@ export class ChannelsService {
     @InjectRepository(ChannelChats)
     private channelChatsRepository: Repository<ChannelChats>,
     private dataSource: DataSource,
+
+    private eventsGateway: EventsGateway,
   ) {}
 
   async findById(id: number) {
@@ -230,10 +233,15 @@ export class ChannelsService {
       throw new NotFoundException('채널을 찾을 수 없습니다.');
     }
 
-    await this.channelChatsRepository.save({
-      channelId: channel.id,
-      userId,
+    // 방법 1: 관계 객체를 직접 할당하여 저장
+    const createdChat = await this.channelChatsRepository.save({
+      channel: { id: channel.id }, // 관계 객체 직접 할당
+      user: { id: userId }, // 관계 객체 직접 할당
       content,
     });
+
+    this.eventsGateway.server
+      ?.to(`/ws-${url}-${createdChat.channelId}`)
+      ?.emit('message', createdChat);
   }
 }
