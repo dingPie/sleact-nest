@@ -15,12 +15,6 @@ export class UsersService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
-    // 이건 안써도 되나?
-    @InjectRepository(WorkspaceMembers)
-    private readonly workspaceMembersRepository: Repository<WorkspaceMembers>,
-    @InjectRepository(ChannelMembers)
-    private readonly channelMembersRepository: Repository<ChannelMembers>,
-
     private dataSource: DataSource,
   ) {}
 
